@@ -17,47 +17,98 @@ class MailService:
 
     def sendMessage(self, message):
         self.messages.append(message)
-        return {"Mensagem enviada com sucesso."}
+        return {"status": "200", "message": "Mensagem enviada com sucesso."}
+
+    def deleteMessage(self, index):
+        if index >= len(self.messages):
+            return {"status": "404", "message": "Índice inválido."}
+        self.messages.pop(index)
+        return {"status": "200", "message": "Mensagem excluída com sucesso."}
+
+    def openMessage(self, index):
+        if index >= len(self.messages):
+            return {"status": "404", "message": "Índice inválido."}
+        return {"status": "200", "data": vars(self.messages[index])}
+
+    def forwardMessage(self, index, sender, receiver):
+        if index >= len(self.messages):
+            return {"status": "404", "message": "Índice da mensagem inválido."}
+        message = self.messages[index]
+        newMessage = Message(sender, receiver, "FW: "+message.subject, message.content)
+        self.messages.append(newMessage)
+        return {"status": "200", "message": "Mensagem encaminhada com sucesso."}
+
+    def replyMessage(self, index, content):
+        if index >= len(self.messages):
+            return {"status": "404", "message": "Índice inválido."}
+        message = self.messages[index]
+        newMessage = Message(message.receiver, message.sender, "RE: "+message.subject, content)
+        self.messages.append(newMessage)
+        return {"status": "200", "message": "Mensagem respondida com sucesso."}
 
 def parseRequest(request):
-    json_pattern = r'\{.*\}'
-    match = re.search(json_pattern, request, re.DOTALL)
-    method, url, http_version = request.split("\n")[0].split(" ")
+    jsonPattern = r'\{.*\}'
+    match = re.search(jsonPattern, request, re.DOTALL)
+    method, url, httpVersion = request.split("\n")[0].split(" ")
     body = match.group(0) if match else None
     return method, url, body
 
 def parseResponse(response):
-    response_headers = "HTTP/1.1 " + response["status"] + "\n"
-    response_headers += "Content-Type: application/json\n"
-    response_body = json.dumps(response)
-    response_headers += "Content-Length: " + str(len(response_body)) + "\n\n"
-    response = response_headers + response_body
+    responseHeaders = "HTTP/1.1 " + response["status"] + "\n"
+    responseHeaders += "Content-Type: application/json\n"
+    responseBody = json.dumps(response)
+    responseHeaders += "Content-Length: " + str(len(responseBody)) + "\n\n"
+    response = responseHeaders + responseBody
     return response
 
 ## Web Service Start ##
-message_server = MailService()
+messageService = MailService()
 
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-server_socket.bind(('localhost', 8081))
-server_socket.listen()
+socketServer = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+socketServer.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+socketServer.bind(('localhost', 8081))
+socketServer.listen()
 
 print("Servidor iniciado na porta 8081...")
 
 while True:
-    (client_socket, client_address) = server_socket.accept()
-    request = client_socket.recv(4096).decode()
+    (connection, adress) = socketServer.accept()
+    request = connection.recv(4096).decode()
 
     method, url, body = parseRequest(request)
 
-    if url == "/send" and method == "POST":
+    if url == "/list" and method == "GET":
+        response = messageService.listMessages()
+
+    elif url == "/send" and method == "POST":
         message_data = json.loads(body)
         message = Message(**message_data)
-        response = message_server.sendMessage(message)
+        response = messageService.sendMessage(message)
 
-    elif url == "/list" and method == "GET":
-        response = message_server.listMessages()
+    elif url.startswith("/delete") and method == "DELETE":
+        index = int(url.split("/")[-1])
+        response = messageService.deleteMessage(index)
+
+    elif url.startswith("/open") and method == "GET":
+        index = int(url.split("/")[-1])
+        response = messageService.openMessage(index)
+
+    elif url.startswith("/forward") and method == "POST":
+        message_data = json.loads(body)
+        index = int(message_data["messageID"])
+        sender = message_data["sender"]
+        receiver = message_data["receiver"]
+        response = messageService.forwardMessage(index, sender, receiver)
+
+    elif url.startswith("/reply") and method == "POST":
+        message_data = json.loads(body)
+        index = int(message_data["messageID"])
+        content = message_data["content"]
+        response = messageService.replyMessage(index, content)
+
+    else:
+        response = {"status": "404", "message": "URL não encontrada."}
 
     response = parseResponse(response)
-    client_socket.sendall(response.encode())
-    client_socket.close()
+    connection.sendall(response.encode())
+    connection.close()
