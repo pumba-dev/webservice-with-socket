@@ -16,7 +16,7 @@ class MailService:
         return {"status": "200", "data": [vars(m) for m in self.messages]}
 
     def listByReceiver(self, receiver): 
-        messages = [vars(m) for m in self.messages if m.receiver == receiver]
+        messages = [m for m in self.messages if m.receiver == receiver]
         return {"status": "200", "data": [vars(m) for m in messages]}
     
     def sendMessage(self, message):
@@ -55,9 +55,9 @@ def parseRequest(request):
     headerPattern = r'^(\w+) (\S+) (HTTP/\d+\.\d+)'
     bodyMatch = re.search(bodyPattern, request, re.DOTALL)
     headerMatch = re.search(headerPattern, request, re.MULTILINE)
-    body = bodyMatch.group(0) if bodyMatch else None
-    method = headerMatch.group(1) if headerMatch else None
-    url = headerMatch.group(2) if headerMatch else None
+    body = bodyMatch.group(0) if bodyMatch else ""
+    method = headerMatch.group(1) if headerMatch else ""
+    url = headerMatch.group(2) if headerMatch else ""
     return method, url, body
 
 def parseResponse(response):
@@ -91,7 +91,7 @@ while True:
     if method == "OPTIONS":
         response = {"status": "200 OK", "message": "Url não encontrada."}
 
-    elif url.startswith("/list") and method == "GET":
+    elif url == "/list" and method == "GET":
         response = messageService.listMessages()
     
     elif url.startswith("/listByReceiver") and method == "GET":
