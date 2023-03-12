@@ -2,7 +2,7 @@
   <v-btn
     block
     type="submit"
-    :class="`bg-${color} fill-height rounded h-10 pa-4 my-4 font-weight-light text-capitalize`"
+    :class="`text-center bg-${color} fill-height rounded h-10 pa-4 my-4 font-weight-light text-capitalize`"
     ><slot></slot
   ></v-btn>
 </template>
