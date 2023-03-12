@@ -32,7 +32,10 @@ import MailList from "@/components/session/MailList";
 import SendMail from "@/components/session/SendMail";
 import localStorage from "@/utils/localStorage";
 import ForwardMail from "../session/ForwardMail.vue";
+import mailService from "@/services/mail";
+import { useStore } from "vuex";
 
+const store = useStore();
 const user = ref(localStorage.get("userToken"));
 const selectedMenu = ref("mail-list");
 const menuItem = ref({});
@@ -61,6 +64,25 @@ function forwardMail(mail) {
 }
 function deleteMail(mail) {
   console.log("Delete Mail", mail);
+  mailService
+    .delete(mail.id)
+    .then((response) => {
+      console.log("response: ", response);
+      store.dispatch("notifySystem/create", {
+        text: "E-mail apagado com sucesso!.",
+        icon: "mdi-check-circle-outline",
+        color: "sucess",
+      });
+      window.location.reload();
+    })
+    .catch((error) => {
+      console.log("error: ", error);
+      store.dispatch("notifySystem/create", {
+        text: "Erro interno ao apagar e-mail.",
+        icon: "mdi-alert-circle-outline",
+        color: "error",
+      });
+    });
 }
 </script>
 

@@ -43,7 +43,7 @@ function handleAction(key) {
       break;
     case "sign-out":
       authentication.logout();
-      router.push("home");
+      router.push("/");
       break;
   }
 }

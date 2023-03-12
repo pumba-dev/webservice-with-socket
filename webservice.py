@@ -14,6 +14,12 @@ class MailService:
         self.messages = []
         self.listCount = 0
 
+    def getMessageById(self, index):
+        for message in self.messages:
+            if message.id == index:
+                return message
+        return None
+
     def listMessages(self):
         return {"status": "200", "data": [vars(m) for m in self.messages]}
 
@@ -28,33 +34,35 @@ class MailService:
         return {"status": "200", "message": "Mensagem enviada com sucesso."}
 
     def deleteMessage(self, index):
-        if index >= len(self.messages):
-            return {"status": "404", "message": "Índice inválido."}
-        self.messages.pop(index)
-        return {"status": "200", "message": "Mensagem excluída com sucesso."}
+        message = self.getMessageById(index)
+        if message:
+            self.messages.remove(message)
+            return {"status": "200", "message": "Mensagem excluída com sucesso."}
+        return  {"status": "404", "message": "Indice invalido."}
 
     def openMessage(self, index):
-        if index >= len(self.messages):
-            return {"status": "404", "message": "Índice inválido."}
-        return {"status": "200", "data": vars(self.messages[index])}
+       message = self.getMessageById(index)
+       if(message):
+            return {"status": "200", "data": vars(message)}
+       return {"status": "404", "message": "Índice inválido."}
 
     def forwardMessage(self, index, sender, receiver):
-        if index >= len(self.messages):
-            return {"status": "404", "message": "Índice da mensagem inválido."}
-        message = self.messages[index]
-        newMessage = Message(self.listCount, sender, receiver, "FW: "+message.subject, message.content)
-        self.messages.append(newMessage)
-        self.listCount += 1
-        return {"status": "200", "message": "Mensagem encaminhada com sucesso."}
+        message = self.getMessageById(index)
+        if(message):
+            newMessage = Message(self.listCount, sender, receiver, "FW: "+message.subject, message.content)
+            self.messages.append(newMessage)
+            self.listCount += 1
+            return {"status": "200", "message": "Mensagem encaminhada com sucesso."}
+        return {"status": "404", "message": "Índice da mensagem inválido."}
 
     def replyMessage(self, index, content):
-        if index >= len(self.messages):
-            return {"status": "404", "message": "Índice inválido."}
-        message = self.messages[index]
-        newMessage = Message(self.listCount, message.receiver, message.sender, "RE: "+message.subject, content)
-        self.messages.append(newMessage)
-        self.listCount += 1
-        return {"status": "200", "message": "Mensagem respondida com sucesso."}
+        message = self.getMessageById(index)
+        if(message):
+            newMessage = Message(self.listCount, message.receiver, message.sender, "RE: "+message.subject, content)
+            self.messages.append(newMessage)
+            self.listCount += 1
+            return {"status": "200", "message": "Mensagem respondida com sucesso."}
+        return {"status": "404", "message": "Índice inválido."}
 
 def parseRequest(request):
     bodyPattern = r'\{.*\}'
@@ -70,6 +78,7 @@ def parseResponse(response):
     responseHeaders = "HTTP/1.1 " + response['status'] + "\n"
     responseHeaders += "Content-Type: application/json\n"
     responseHeaders += 'Access-Control-Allow-Origin: *\r\n'
+    responseHeaders += 'Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS\r\n'
     responseHeaders += 'Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Origin\r\n'
     responseBody = json.dumps(response)
     responseHeaders += "Content-Length: " + str(len(responseBody)) + "\n\n"
