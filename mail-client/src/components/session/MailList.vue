@@ -5,7 +5,7 @@
       style="cursor: pointer"
       v-for="(item, index) in mailList"
     >
-      <EmailCard :title="item.subject" :preview="item.content"></EmailCard>
+      <EmailCard :title="item.sender" :preview="item.subject"></EmailCard>
     </v-list-item>
   </v-list>
 </template>
