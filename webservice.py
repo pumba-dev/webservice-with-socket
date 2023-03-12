@@ -2,7 +2,8 @@ import socket
 import json
 import re
 class Message:
-    def __init__(self, sender, receiver, subject, content):
+    def __init__(self, index, sender, receiver, subject, content):
+        self.id = index
         self.sender = sender
         self.receiver = receiver
         self.subject = subject
@@ -11,6 +12,7 @@ class Message:
 class MailService:
     def __init__(self):
         self.messages = []
+        self.listCount = 0
 
     def listMessages(self):
         return {"status": "200", "data": [vars(m) for m in self.messages]}
@@ -20,7 +22,9 @@ class MailService:
         return {"status": "200", "data": [vars(m) for m in messages]}
     
     def sendMessage(self, message):
-        self.messages.append(message)
+        newMessage = Message(self.listCount, **message)
+        self.messages.append(newMessage)
+        self.listCount += 1
         return {"status": "200", "message": "Mensagem enviada com sucesso."}
 
     def deleteMessage(self, index):
@@ -38,16 +42,18 @@ class MailService:
         if index >= len(self.messages):
             return {"status": "404", "message": "Índice da mensagem inválido."}
         message = self.messages[index]
-        newMessage = Message(sender, receiver, "FW: "+message.subject, message.content)
+        newMessage = Message(self.listCount, sender, receiver, "FW: "+message.subject, message.content)
         self.messages.append(newMessage)
+        self.listCount += 1
         return {"status": "200", "message": "Mensagem encaminhada com sucesso."}
 
     def replyMessage(self, index, content):
         if index >= len(self.messages):
             return {"status": "404", "message": "Índice inválido."}
         message = self.messages[index]
-        newMessage = Message(message.receiver, message.sender, "RE: "+message.subject, content)
+        newMessage = Message(self.listCount, message.receiver, message.sender, "RE: "+message.subject, content)
         self.messages.append(newMessage)
+        self.listCount += 1
         return {"status": "200", "message": "Mensagem respondida com sucesso."}
 
 def parseRequest(request):
@@ -100,8 +106,7 @@ while True:
 
     elif url.startswith("/send") and method == "POST":
         message_data = json.loads(body)
-        message = Message(**message_data)
-        response = messageService.sendMessage(message)
+        response = messageService.sendMessage(message_data)
 
     elif url.startswith("/delete") and method == "DELETE":
         index = int(url.split("/")[-1])
