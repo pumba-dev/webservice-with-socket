@@ -15,6 +15,10 @@ class MailService:
     def listMessages(self):
         return {"status": "200", "data": [vars(m) for m in self.messages]}
 
+    def listByReceiver(self, receiver): 
+        messages = [vars(m) for m in self.messages if m.receiver == receiver]
+        return {"status": "200", "data": [vars(m) for m in messages]}
+    
     def sendMessage(self, message):
         self.messages.append(message)
         return {"status": "200", "message": "Mensagem enviada com sucesso."}
@@ -93,10 +97,14 @@ while True:
     if method == "OPTIONS":
         response = {"status": "200 OK", "message": "Url não encontrada."}
 
-    elif url == "/list" and method == "GET":
+    elif url.startswith("/list") and method == "GET":
         response = messageService.listMessages()
+    
+    elif url.startswith("/listByReceiver") and method == "GET":
+        receiver = url.split("/")[-1]
+        response = messageService.listByReceiver(receiver)
 
-    elif url == "/send" and method == "POST":
+    elif url.startswith("/send") and method == "POST":
         message_data = json.loads(body)
         message = Message(**message_data)
         response = messageService.sendMessage(message)
