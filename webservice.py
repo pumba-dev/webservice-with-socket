@@ -51,14 +51,17 @@ class MailService:
         return {"status": "200", "message": "Mensagem respondida com sucesso."}
 
 def parseRequest(request):
-    jsonPattern = r'\{.*\}'
-    match = re.search(jsonPattern, request, re.DOTALL)
-    method, url, httpVersion = request.split("\n")[0].split(" ")
-    body = match.group(0) if match else None
+    bodyPattern = r'\{.*\}'
+    headerPattern = r'^(\w+) (\S+) (HTTP/\d+\.\d+)'
+    bodyMatch = re.search(bodyPattern, request, re.DOTALL)
+    headerMatch = re.search(headerPattern, request, re.MULTILINE)
+    body = bodyMatch.group(0) if bodyMatch else None
+    method = headerMatch.group(1) if headerMatch else None
+    url = headerMatch.group(2) if headerMatch else None
     return method, url, body
 
 def parseResponse(response):
-    responseHeaders = "HTTP/1.1 " + response["status"] + "\n"
+    responseHeaders = "HTTP/1.1 " + response['status'] + "\n"
     responseHeaders += "Content-Type: application/json\n"
     responseHeaders += 'Access-Control-Allow-Origin: *\r\n'
     responseHeaders += 'Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Origin\r\n'
@@ -80,19 +83,10 @@ print("Servidor iniciado na porta 8081...")
 while True:
     (connection, adress) = socketServer.accept()
     request = connection.recv(4096).decode()
+    print('Recebido:', request)
+    print()
 
     method, url, body = parseRequest(request)
-
-    print()
-    print("## RECIEVE REQUEST ##")
-    print()
-    print("method")
-    print(method)
-    print("url")
-    print(url)
-    print("body")
-    print(body)
-    print()
 
     if method == "OPTIONS":
         response = {"status": "200 OK", "message": "Url não encontrada."}
