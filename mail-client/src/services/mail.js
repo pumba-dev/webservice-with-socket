@@ -2,16 +2,16 @@ import axiosInstance from "@/services/axiosInstance";
 
 export default {
   getAll: () => {
-    localStorage.get("/list");
+    return axiosInstance.get("/list");
   },
   open: (messageID) => {
-    localStorage.get(`/open/${messageID}`);
+    return axiosInstance.get(`/open/${messageID}`);
   },
   delete: (messageID) => {
-    axiosInstance.delete(`/delete/${messageID}`);
+    return axiosInstance.delete(`/delete/${messageID}`);
   },
   send: (sender, receiver, subject, content) => {
-    axiosInstance.post("/send", {
+    return axiosInstance.post("/send", {
       sender,
       receiver,
       subject,
@@ -19,14 +19,14 @@ export default {
     });
   },
   forward: (messageID, sender, receiver) => {
-    axiosInstance.post("/forward", {
+    return axiosInstance.post("/forward", {
       messageID,
       sender,
       receiver,
     });
   },
   reply: (messageID, content) => {
-    axiosInstance.post("/reply", {
+    return axiosInstance.post("/reply", {
       messageID,
       content,
     });

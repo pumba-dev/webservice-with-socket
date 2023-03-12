@@ -8,11 +8,14 @@
     <v-app-bar>
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
 
-      <v-toolbar-title>Lista de E-mails</v-toolbar-title>
+      <v-toolbar-title>Serviço de Mensagens Rápidas</v-toolbar-title>
     </v-app-bar>
 
     <v-main>
-      <component :is="sessionComponent"></component>
+      <component
+        @openMailList="selectedMenu = 'mail-list'"
+        :is="sessionComponent"
+      ></component>
     </v-main>
   </v-app>
 </template>

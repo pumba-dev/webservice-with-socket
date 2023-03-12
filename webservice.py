@@ -56,6 +56,8 @@ def parseRequest(request):
 def parseResponse(response):
     responseHeaders = "HTTP/1.1 " + response["status"] + "\n"
     responseHeaders += "Content-Type: application/json\n"
+    responseHeaders += 'Access-Control-Allow-Origin: *\r\n'
+    responseHeaders += 'Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Origin\r\n'
     responseBody = json.dumps(response)
     responseHeaders += "Content-Length: " + str(len(responseBody)) + "\n\n"
     response = responseHeaders + responseBody
@@ -66,7 +68,7 @@ messageService = MailService()
 
 socketServer = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 socketServer.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-socketServer.bind(('localhost', 8081))
+socketServer.bind(('', 8081))
 socketServer.listen()
 
 print("Servidor iniciado na porta 8081...")
@@ -77,7 +79,21 @@ while True:
 
     method, url, body = parseRequest(request)
 
-    if url == "/list" and method == "GET":
+    print()
+    print("## RECIEVE REQUEST ##")
+    print()
+    print("method")
+    print(method)
+    print("url")
+    print(url)
+    print("body")
+    print(body)
+    print()
+
+    if method == "OPTIONS":
+        response = {"status": "200 OK", "message": "Url não encontrada."}
+
+    elif url == "/list" and method == "GET":
         response = messageService.listMessages()
 
     elif url == "/send" and method == "POST":
@@ -107,7 +123,7 @@ while True:
         response = messageService.replyMessage(index, content)
 
     else:
-        response = {"status": "404", "message": "URL não encontrada."}
+        response = {"status": "404", "message": "Url nao encontrada."}
 
     response = parseResponse(response)
     connection.sendall(response.encode())
