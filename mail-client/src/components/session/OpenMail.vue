@@ -9,11 +9,11 @@
     <v-sheet class="pa-5">
       <v-row class="flex justify-center">
         <v-col>
-          <InputLabel>Destinatário</InputLabel>
+          <InputLabel>Remetente</InputLabel>
 
           <TextInput
             disabled
-            v-model="fieldsData.receiver"
+            v-model="fieldsData.sender"
             placeholder="Digite o destinatário"
           ></TextInput>
         </v-col>
@@ -46,30 +46,32 @@
     <v-divider></v-divider>
 
     <v-sheet class="d-flex justify-end py-4 px-6">
+      <DashboardButton class="mx-2" @click.prevent="$emit('openMailList')">
+        Voltar
+      </DashboardButton>
+      <DashboardButton class="mx-2" @click.prevent="$emit('replyMail', email)">
+        Responder
+      </DashboardButton>
       <DashboardButton
         class="mx-2"
-        :loading="replyIsLoading"
-        :disabled="replyIsLoading"
-        @click.prevent="$emit('openMailList')"
+        @click.prevent="$emit('forwardMail', email)"
       >
-        Voltar
+        Encaminhar
       </DashboardButton>
     </v-sheet>
   </v-card>
 </template>
 
 <script setup>
-import { reactive, ref, defineEmits, defineProps, onMounted } from "vue";
+import { reactive, defineEmits, defineProps, onMounted } from "vue";
 
 import InputLabel from "@/components/general/forms/InputLabel.vue";
 import TextInput from "@/components/general/forms/TextInput.vue";
 import TextAreaInput from "@/components/general/forms/TextAreaInput.vue";
 import DashboardButton from "@/components/general/buttons/DashboardButton.vue";
 
-const replyIsLoading = ref(false);
-
 onMounted(() => {
-  fieldsData.receiver = props.email.receiver;
+  fieldsData.sender = props.email.sender;
   fieldsData.subject = props.email.subject;
   fieldsData.content = props.email.content;
 });
@@ -84,7 +86,7 @@ const props = defineProps({
 });
 
 const fieldsData = reactive({
-  receiver: "",
+  sender: "",
   subject: "",
   content: "",
 });
