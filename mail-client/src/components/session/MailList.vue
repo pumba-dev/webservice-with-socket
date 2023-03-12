@@ -5,7 +5,13 @@
       style="cursor: pointer"
       v-for="(item, index) in mailList"
     >
-      <EmailCard :title="item.sender" :preview="item.subject"></EmailCard>
+      <EmailCard
+        @openMail="$emit('openMail', $event)"
+        @replyMail="$emit('replyMail', $event)"
+        @forwardMail="$emit('forwardMail', $event)"
+        @deleteMail="$emit('deleteMail', $event)"
+        :mail="item"
+      ></EmailCard>
     </v-list-item>
   </v-list>
 </template>

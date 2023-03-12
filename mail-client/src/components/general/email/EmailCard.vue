@@ -1,9 +1,10 @@
 <template>
-  <v-card :title="title" :text="preview">
+  <v-card :title="mail.subject" :text="mail.sender">
     <v-card-actions>
-      <v-btn>Abrir</v-btn>
-      <v-btn>Responder</v-btn>
-      <v-btn>Encaminhar</v-btn>
+      <v-btn @click="$emit('openMail', mail)">Abrir</v-btn>
+      <v-btn @click="$emit('replyMail', mail)">Responder</v-btn>
+      <v-btn @click="$emit('forwardMail', mail)">Encaminhar</v-btn>
+      <v-btn @click="$emit('deleteMail', mail)">Apagar</v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -12,12 +13,8 @@
 import { defineProps } from "vue";
 
 defineProps({
-  title: {
-    type: String,
-    required: true,
-  },
-  preview: {
-    type: String,
+  mail: {
+    type: Object,
     required: true,
   },
 });
