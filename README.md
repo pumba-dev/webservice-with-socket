@@ -6,9 +6,9 @@
 ![GitHub forks](https://img.shields.io/github/forks/pumba-dev/webservice-with-socket?style=for-the-badge)
 ![Bitbucket open pull requests](https://img.shields.io/github/issues-pr/pumba-dev/webservice-with-socket?style=for-the-badge)
 
-<h2 align="center">☕ Projeto em Andamento </h2>
+<h2 align="center">☕ Projeto Concluído </h2>
 
-<!-- <img src="./src/assets/general/homepage-screenshot.png" alt="Imagem da Home do Site."/> -->
+<img src="./mail-client/src/assets/homepage.png" alt="Imagem da Home do Site."/>
 
 > Aplicação Python e VueJS desenvolvida para aplicar os conceitos de web service sem uso de frameworks modernos no desenvolvimento da API.
 
@@ -46,16 +46,28 @@ Antes de começar, verifique se você atende às seguintes dependências:
 
 Siga estas etapas:
 
+- Clonando projeto
+
 ```
 git clone https://github.com/pumba-dev/webservice-with-socket.git
+```
 
+- Hospedando Servidor
+
+```
 cd webservice-with-socket
+
+py webservice.py
+```
+
+- Hospedando Cliente
+
+```
+cd mail-client
 
 npm install
 
-py webservice.py
-
-npm run serve
+npm run dev
 
 ```
 
