@@ -8,7 +8,7 @@
     <v-app-bar>
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
 
-      <v-toolbar-title>Serviço de Mensagens Rápidas</v-toolbar-title>
+      <v-toolbar-title>Lista de E-mails - {{ user }}</v-toolbar-title>
     </v-app-bar>
 
     <v-main>
@@ -25,7 +25,9 @@ import { ref, computed } from "vue";
 import NavigationDrawer from "@/components/general/navigation/NavigationDrawer";
 import MailList from "@/components/session/MailList";
 import SendMail from "@/components/session/SendMail";
+import localStorage from "@/utils/localStorage";
 
+const user = ref(localStorage.get("userToken"));
 const selectedMenu = ref("mail-list");
 const sessionComponent = computed(() => {
   switch (selectedMenu.value) {

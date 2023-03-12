@@ -4,6 +4,9 @@ export default {
   getAll: () => {
     return axiosInstance.get("/list");
   },
+  getByReceiver: (receiver) => {
+    return axiosInstance.get(`/listByReceiver/${receiver}`);
+  },
   open: (messageID) => {
     return axiosInstance.get(`/open/${messageID}`);
   },

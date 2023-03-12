@@ -11,23 +11,30 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import EmailCard from "@/components/general/email/EmailCard.vue";
+import mailService from "@/services/mail";
+import localStorage from "@/utils/localStorage";
 
-const mailList = ref([
-  {
-    sender: "Remetente 01",
-    receiver: "Destinatário 03",
-    subject: "Título 02",
-    content: "Aqui está escrito o texto...",
-  },
-  {
-    sender: "Remetente 01",
-    receiver: "Destinatário 03",
-    subject: "Título 01",
-    content: "Aqui está escrito o texto...",
-  },
-]);
+onMounted(() => {
+  console.log("Mail List Mounted");
+  fetchMailList();
+});
+
+const mailList = ref([]);
+
+function fetchMailList() {
+  const user = localStorage.get("userToken");
+  mailService
+    .getByReceiver(user)
+    .then((response) => {
+      console.log(response);
+      mailList.value = response.data.data;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+}
 </script>
 
 <style></style>
