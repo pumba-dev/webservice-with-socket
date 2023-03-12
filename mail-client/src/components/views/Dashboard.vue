@@ -31,7 +31,8 @@ import NavigationDrawer from "@/components/general/navigation/NavigationDrawer";
 import MailList from "@/components/session/MailList";
 import SendMail from "@/components/session/SendMail";
 import localStorage from "@/utils/localStorage";
-import ForwardMail from "../session/ForwardMail.vue";
+import ForwardMail from "@/components/session/ForwardMail.vue";
+import ReplyMail from "@/components/session/ReplyMail.vue";
 import mailService from "@/services/mail";
 import { useStore } from "vuex";
 
@@ -47,6 +48,8 @@ const sessionComponent = computed(() => {
       return SendMail;
     case "forward-mail":
       return ForwardMail;
+    case "reply-mail":
+      return ReplyMail;
     default:
       return null;
   }
@@ -57,8 +60,11 @@ function openMail(mail) {
 }
 function replyMail(mail) {
   console.log("Reply Mail", mail);
+  menuItem.value = mail;
+  selectedMenu.value = "reply-mail";
 }
 function forwardMail(mail) {
+  console.log("Forward Mail", mail);
   menuItem.value = mail;
   selectedMenu.value = "forward-mail";
 }

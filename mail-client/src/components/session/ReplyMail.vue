@@ -1,7 +1,7 @@
 <template>
   <v-card>
     <v-card-title class="d-flex justify-space-between align-center my-2">
-      <span class="text-subtitle-1 font-weight-bold">Encaminhar E-mail</span>
+      <span class="text-subtitle-1 font-weight-bold">Responder E-mail</span>
     </v-card-title>
 
     <v-divider></v-divider>
@@ -12,6 +12,7 @@
           <InputLabel>Destinatário</InputLabel>
 
           <TextInput
+            disabled
             v-model="fieldsData.receiver"
             :error="v$.receiver.$error"
             placeholder="Digite o destinatário"
@@ -34,7 +35,6 @@
         <v-col>
           <InputLabel>Mensagem</InputLabel>
           <TextAreaInput
-            disabled
             class="h-100"
             v-model="fieldsData.content"
             :error="v$.content.$error"
@@ -49,18 +49,18 @@
     <v-sheet class="d-flex justify-end py-4 px-6">
       <DashboardButton
         class="mx-2"
-        :loading="forwardIsLoading"
-        :disabled="forwardIsLoading"
+        :loading="replyIsLoading"
+        :disabled="replyIsLoading"
         @click.prevent="$emit('openMailList')"
       >
         Voltar
       </DashboardButton>
       <DashboardButton
-        :loading="forwardIsLoading"
-        :disabled="forwardIsLoading"
-        @click.prevent="forwardMail"
+        :loading="replyIsLoading"
+        :disabled="replyIsLoading"
+        @click.prevent="replyMail"
       >
-        Encaminhar
+        Responder
       </DashboardButton>
     </v-sheet>
   </v-card>
@@ -77,14 +77,17 @@ import InputLabel from "@/components/general/forms/InputLabel.vue";
 import TextInput from "@/components/general/forms/TextInput.vue";
 import TextAreaInput from "@/components/general/forms/TextAreaInput.vue";
 import DashboardButton from "@/components/general/buttons/DashboardButton.vue";
-import localStorage from "@/utils/localStorage";
 
-const forwardIsLoading = ref(false);
+const replyIsLoading = ref(false);
 const store = useStore();
 
 onMounted(() => {
-  fieldsData.subject = "FW: " + props.email.subject;
-  fieldsData.content = props.email.content;
+  fieldsData.receiver = props.email.sender;
+  fieldsData.subject = "RE: " + props.email.subject;
+  fieldsData.content =
+    "\n" +
+    "-----------------------------------------------------------------\n" +
+    props.email.content;
 });
 
 const emit = defineEmits("openMailList");
@@ -115,21 +118,20 @@ const rules = reactive({
 
 const v$ = useVuelidate(rules, fieldsData);
 
-async function forwardMail() {
-  forwardIsLoading.value = true;
+async function replyMail() {
+  replyIsLoading.value = true;
 
   const formIsValid = await v$.value.$validate();
 
   if (formIsValid) {
-    const sender = localStorage.get("userToken");
     const emailID = props.email.id;
-    console.log("Forward Data", emailID, sender, fieldsData.receiver);
+    console.log("Forward Data", emailID, fieldsData.content);
     await mailService
-      .forward(emailID, sender, fieldsData.receiver)
+      .reply(emailID, fieldsData.content)
       .then((response) => {
         console.log("response: ", response);
         store.dispatch("notifySystem/create", {
-          text: "E-mail encaminhado com sucesso!.",
+          text: "E-mail respondido com sucesso!.",
           icon: "mdi-check-circle-outline",
           color: "sucess",
         });
@@ -138,19 +140,19 @@ async function forwardMail() {
       .catch((error) => {
         console.log("error: ", error);
         store.dispatch("notifySystem/create", {
-          text: "Erro interno ao encaminhar e-mail.",
+          text: "Erro interno ao responder e-mail.",
           icon: "mdi-alert-circle-outline",
           color: "error",
         });
       });
-    forwardIsLoading.value = false;
+    replyIsLoading.value = false;
   } else {
     store.dispatch("notifySystem/create", {
       text: "Verifique os dados inseridos e tente novamente.",
       icon: "mdi-alert-circle-outline",
       color: "error",
     });
-    forwardIsLoading.value = false;
+    replyIsLoading.value = false;
   }
 }
 </script>
